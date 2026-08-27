@@ -1,0 +1,40 @@
+llm-rag-agent-playground/
+├── README.md               # 项目总说明（github自动生成，后续自己改写）
+├── requirements.txt        # python依赖包清单
+├── .gitignore              # git忽略文件（选python模板已经生成，可以补充）
+├── config/                 # 配置文件夹：存放api密钥、模型配置（不要提交真实密钥！）
+│   └── config_example.py   # 示例配置，只放模板，不写真实key
+├── notebooks/              # jupyter笔记，用来做实验、调试RAG、Agent原型
+│   └── 01_llm_basic.ipynb  # 第一课：大模型基础调用notebook
+├── src/                    # 正式源码目录
+│   ├── llm/                # 大模型调用封装
+│   │   └── llm_client.py
+│   ├── rag/                # RAG模块：加载文档、切分、向量库、检索
+│   │   ├── loader.py
+│   │   ├── splitter.py
+│   │   ├── vector_store.py
+│   │   └── retriever.py
+│   └── agent/              # Agent智能体模块：工具、记忆、规划
+│       ├── tools.py
+│       └── agent_runner.py
+├── data/                   # 本地文档数据，pdf/txt等，git不要上传大文件
+├── examples/               # 可直接运行示例脚本
+│   ├── demo_llm.py
+│   ├── demo_rag.py
+│   └── demo_agent.py
+└── docs/                   # 学习笔记、方案文档
+
+## 三、本地提交第一版代码推送到GitHub
+终端在项目根目录执行
+```bash
+# 查看哪些文件变更
+git status
+
+# 添加全部新建文件到暂存区
+git add .
+
+# 提交，写提交说明（规范：feat代表新增功能/项目骨架）
+git commit -m "feat: day01 初始化RAG Agent项目仓库，搭建目录骨架"
+
+# 推送到github远程main分支
+git push origin main

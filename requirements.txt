@@ -1,0 +1,15 @@
+# 大模型基础调用
+openai>=1.0
+python-dotenv>=1.0
+
+# RAG文档处理
+langchain>=0.3
+langchain-openai
+langchain-community
+chromadb
+pypdf
+sentence-transformers
+
+# notebook实验
+jupyter
+ipykernel

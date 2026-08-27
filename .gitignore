@@ -216,3 +216,30 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# 密钥配置文件
+config/config.py
+
+# 虚拟环境
+venv/
+.venv/
+
+# 向量数据库持久化文件
+chroma_db/
+
+# 本地数据文档
+data/*
+!data/.gitkeep
+
+# jupyter输出缓存
+.ipynb_checkpoints/
+
+# python缓存
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 环境变量文件
+.env
+.env.local
