@@ -1,21 +1,18 @@
 from typing import List
 from langchain_core.embeddings import Embeddings
-import numpy as np
+from sentence_transformers import SentenceTransformer
 
 class SimpleEmbedding(Embeddings):
-    """简单模拟Embedding，仅用于调试跑通RAG流程，无真实语义能力"""
     def __init__(self):
-        pass
+        # 轻量开源向量模型，第一次运行自动下载
+        self.model = SentenceTransformer("all-MiniLM-L6-v2")
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
-        res = []
-        for t in texts:
-            vec = np.random.rand(128).tolist()
-            res.append(vec)
-        return res
+        embeds = self.model.encode(texts).tolist()
+        return embeds
 
     def embed_query(self, text: str) -> List[float]:
-        return np.random.rand(128).tolist()
+        return self.model.encode(text).tolist()
 
     def __call__(self, text: str):
         return self.embed_query(text)

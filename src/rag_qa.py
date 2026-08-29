@@ -1,9 +1,9 @@
 from src.vector_store import load_vector_db
-from src.llm_client import LLMClient
+from src.llm.llm_client import DeepSeekLLMClient
 
 
 def rag_query(question: str, top_k: int = 3):
-    # 1.加载FAISS向量库
+    # 1.加载向量库
     db = load_vector_db()
     # 2.检索相关文档片段
     docs = db.similarity_search(question, k=top_k)
@@ -20,8 +20,8 @@ def rag_query(question: str, top_k: int = 3):
 【用户问题】
 {question}
 """
-    # 4.实例化客户端，调用chat方法
-    llm_client = LLMClient()
+    # 4.调用DeepSeek
+    llm_client = DeepSeekLLMClient()
     answer = llm_client.chat(prompt=user_prompt)
 
     return {
@@ -32,7 +32,6 @@ def rag_query(question: str, top_k: int = 3):
 
 
 if __name__ == "__main__":
-    # 修改为你的真实问题
     result = rag_query("如何把本地代码推送到GitHub？", top_k=4)
 
     print("====检索到的知识库片段====")

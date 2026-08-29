@@ -3,6 +3,7 @@ llm-rag-agent-playground/
 ├── requirements.txt        # python依赖包清单
 ├── .gitignore              # git忽略文件（选python模板已经生成，可以补充）
 ├── config/                 # 配置文件夹：存放api密钥、模型配置（不要提交真实密钥！）
+│   ├── __init__.py
 │   └── config_example.py   # 示例配置，只放模板，不写真实key
 ├── notebooks/              # jupyter笔记，用来做实验、调试RAG、Agent原型
 │   └── 01_llm_basic.ipynb  # 第一课：大模型基础调用notebook
