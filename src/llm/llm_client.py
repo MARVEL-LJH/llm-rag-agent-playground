@@ -10,7 +10,7 @@ class DeepSeekLLMClient:
     def chat(self, prompt: str) -> str:
         headers = {
             "Authorization": f"Bearer {self.api_key}",
-            "Content‑Type": "application/json"
+            "Content-Type": "application/json"
         }
         payload = {
             "model": "deepseek-v4-flash",

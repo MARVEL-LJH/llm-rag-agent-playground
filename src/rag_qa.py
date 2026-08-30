@@ -11,18 +11,17 @@ def rag_query(question: str, top_k: int = 3):
     context_text = "\n---\n".join(context_list)
 
     # 3.构造RAG的用户prompt
-    user_prompt = f"""请仔细阅读下面【参考上下文】，依据上下文内容回答用户问题。
-答案必须来自上下文，如果上下文完全没有相关内容，才回答不知道。
-
-【参考上下文】
+    # 构造RAG提示词，把检索到的上下文塞进去
+    rag_prompt = f"""请基于下面参考资料回答用户问题，不要编造资料以外的内容。
+    参考资料：
 {context_text}
 
 【用户问题】
 {question}
 """
     # 4.调用DeepSeek
-    llm_client = DeepSeekLLMClient()
-    answer = llm_client.chat(prompt=user_prompt)
+    llm = DeepSeekLLMClient()
+    answer = llm.chat(rag_prompt)
 
     return {
         "question": question,
@@ -32,7 +31,7 @@ def rag_query(question: str, top_k: int = 3):
 
 
 if __name__ == "__main__":
-    result = rag_query("如何把本地代码推送到GitHub？", top_k=4)
+    result = rag_query("什么是Redis？", top_k=4)
 
     print("====检索到的知识库片段====")
     for chunk in result["retrieve_context"]:
@@ -41,3 +40,4 @@ if __name__ == "__main__":
 
     print("\n====RAG回答结果====")
     print(result["answer"])
+77
