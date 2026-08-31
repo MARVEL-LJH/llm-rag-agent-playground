@@ -2,7 +2,6 @@ import json
 from src.llm.llm_client import DeepSeekLLMClient
 from src.agent.tools import TOOL_LIST, TOOL_FUNC_MAP
 
-# Agent系统提示词，约束大模型输出格式
 AGENT_SYSTEM_PROMPT = """
 你是智能Agent，可以使用工具解决用户问题。
 可用工具列表：{tools_info}
@@ -31,64 +30,62 @@ AGENT_SYSTEM_PROMPT = """
 """.format(tools_info=json.dumps(TOOL_LIST, ensure_ascii=False))
 
 
-
 class SimpleAgent:
     def __init__(self):
         self.llm = DeepSeekLLMClient()
-
-    def run(self, user_question: str) -> str:
-        messages = [
-            {"role": "system", "content": AGENT_SYSTEM_PROMPT},
-            {"role": "user", "content": user_question}
+        # 消息记忆，保存完整对话历史
+        self.messages = [
+            {"role": "system", "content": AGENT_SYSTEM_PROMPT}
         ]
 
-        # 1.大模型做第一次思考，输出JSON
-        resp_text = self.llm.chat(prompt=json.dumps(messages, ensure_ascii=False))
-        # 清洗，去掉markdown ```json标记
+    def run(self, user_question: str) -> str:
+        # 用户消息加入记忆
+        self.messages.append({"role": "user", "content": user_question})
+
+        resp_text = self.llm.chat(prompt=json.dumps(self.messages, ensure_ascii=False))
         resp_text = resp_text.replace("```json", "").replace("```", "").strip()
         output = json.loads(resp_text)
 
-        # 分支1：不调用工具，直接返回答案
         if not output["use_tool"]:
-            return output["answer"]
+            ans = output["answer"]
+            self.messages.append({"role": "assistant", "content": ans})
+            return ans
 
-        # 分支2：调用工具
+        # 执行工具
         tool_name = output["tool_name"]
         tool_args = output["tool_args"]
         print(f"\n>>> Agent调用工具：{tool_name}, 参数:{tool_args}")
-
         func = TOOL_FUNC_MAP[tool_name]
         tool_result = func(**tool_args)
         print(f">>> 工具返回结果：{tool_result}")
 
-        # 把【用户原始问题 + 工具执行结果】再丢给大模型，生成最终回答
+        # 工具结果，单独发一次性prompt，强制输出自然语言，禁止JSON
         final_prompt = f"""
-用户问题：{user_question}
-工具调用返回结果：{tool_result}
-根据工具结果整理成自然语言回答用户。
+用户原始提问：{user_question}
+工具名称：{tool_name}
+工具返回结果：{tool_result}
+
+任务：根据以上信息，直接输出自然语言回答用户。
+⚠️禁止输出JSON，禁止输出thought、use_tool等字段，只输出人类可读的回答文本。
 """
         final_ans = self.llm.chat(prompt=final_prompt)
+        self.messages.append({"role":"assistant","content":final_ans})
         return final_ans
+
+    def clear_memory(self):
+        """清空记忆，开启新会话"""
+        self.messages = [
+            {"role": "system", "content": AGENT_SYSTEM_PROMPT}
+        ]
 
 
 if __name__ == "__main__":
     agent = SimpleAgent()
-    print("====Agent启动，输入你的问题====")
-
-    q1 = "如何把本地代码推送到GitHub？"
-    ans1 = agent.run(q1)
-    print(f"\n【最终回答】{ans1}\n")
-
-    q2 = "789 + 211等于多少"
-    ans2 = agent.run(q2)
-    print(f"\n【最终回答】{ans2}\n")
-
-    q3 = "什么是Redis"
-    ans3 = agent.run(q3)
-    print(f"\n【最终回答】{ans3}\n")
-
-    q4 = "项目src目录下面有哪些模块"
-    ans4 = agent.run(q4)
-    print(f"\n【最终回答】{ans4}\n")
-
-
+    print("==== Agent多轮对话聊天，输入quit退出 ====")
+    while True:
+        question = input("\n你：")
+        if question.strip().lower() == "quit":
+            print("Agent会话结束")
+            break
+        reply = agent.run(question)
+        print(f"Agent：{reply}")
