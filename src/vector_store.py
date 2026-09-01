@@ -4,6 +4,11 @@ from langchain_community.document_loaders import TextLoader
 from langchain_community.vectorstores import FAISS
 from config.config import VECTOR_DB_PATH
 from src.simple_embedding import SimpleEmbedding
+import sys
+from pathlib import Path
+# vector_store.py 在 src/文件夹下，只需要两层parent
+project_root = Path(__file__).parent.parent.resolve()
+sys.path.insert(0, str(project_root))
 
 
 def build_vector_db(txt_file_path: str):

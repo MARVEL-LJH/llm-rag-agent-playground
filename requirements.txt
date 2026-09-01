@@ -13,3 +13,6 @@ sentence-transformers
 # notebook实验
 jupyter
 ipykernel
+
+#PDF 解析库
+pypdf>=4.0.0
