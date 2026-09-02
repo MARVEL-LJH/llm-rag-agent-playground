@@ -1,49 +1,44 @@
-import os
+from src.rag.loader import load_directory
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.document_loaders import TextLoader
-from langchain_community.vectorstores import FAISS
-from config.config import VECTOR_DB_PATH
-from src.simple_embedding import SimpleEmbedding
-import sys
-from pathlib import Path
-# vector_store.py 在 src/文件夹下，只需要两层parent
-project_root = Path(__file__).parent.parent.resolve()
-sys.path.insert(0, str(project_root))
+from langchain_chroma import Chroma
+from langchain_community.embeddings import HuggingFaceEmbeddings
 
-
-def build_vector_db(txt_file_path: str):
-    """加载txt文档，切分，构建FAISS向量库"""
-    loader = TextLoader(txt_file_path, encoding="utf-8")
-    documents = loader.load()
-
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=500,
-        chunk_overlap=80,
-        separators=["\n\n", "\n", "。", "，", " "]
-    )
-    split_docs = text_splitter.split_documents(documents)
-    print(f"文档切分完成，一共 {len(split_docs)} 个片段")
-
-    embeddings = SimpleEmbedding()
-    db = FAISS.from_documents(documents=split_docs, embedding=embeddings)
-
-    # FAISS保存本地
-    db.save_local(VECTOR_DB_PATH)
-    print(f"向量库构建完成，保存路径：{VECTOR_DB_PATH}")
-    return db
-
+PERSIST_DIR = "./chroma_db"
 
 def load_vector_db():
-    """加载本地FAISS向量库"""
-    embeddings = SimpleEmbedding()
-    db = FAISS.load_local(
-        VECTOR_DB_PATH,
-        embeddings,
-        allow_dangerous_deserialization=True
+    """加载已经保存好的向量库，给rag_qa调用"""
+    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+    db = Chroma(
+        persist_directory=PERSIST_DIR,
+        embedding_function=embeddings
     )
     return db
 
+def main():
+    raw_docs = load_directory("./data")
+    if not raw_docs:
+        print("警告：没有加载到任何文档！")
+        return
+
+    splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+    all_texts = []
+    all_metas = []
+    for item in raw_docs:
+        chunks = splitter.split_text(item["content"])
+        for chunk in chunks:
+            all_texts.append(chunk)
+            all_metas.append({"source": item["source"]})
+
+    print(f"文档切分完成，一共 {len(all_texts)} 个片段")
+
+    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+    db = Chroma.from_texts(
+        texts=all_texts,
+        metadatas=all_metas,
+        embedding=embeddings,
+        persist_directory=PERSIST_DIR
+    )
+    print(f"向量库构建完成，保存路径：{PERSIST_DIR}")
 
 if __name__ == "__main__":
-    txt_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "plaintext.txt")
-    build_vector_db(txt_path)
+    main()

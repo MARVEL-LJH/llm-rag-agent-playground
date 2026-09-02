@@ -2,15 +2,15 @@ import json
 from src.llm.llm_client import DeepSeekLLMClient
 from src.agent.tools import TOOL_LIST, TOOL_FUNC_MAP
 
-AGENT_SYSTEM_PROMPT = """
-你是智能Agent，可以**多次循环调用工具**解决用户问题。
+AGENT_SYSTEM_PROMPT = """你是智能Agent，可以**多次循环调用工具**解决用户问题。
 可用工具列表：{tools_info}
 
 强制规则：
 1. 凡是和本项目、git、代码、目录结构、项目文档相关的问题，必须调用rag_search工具查询本地知识库，禁止直接回答。
 2. 如果不确定问题是否在本地知识库，也优先调用rag_search。
 3. rag_search拿到结果后，如果还需要计算、查询，可以继续调用其他工具，不要直接编造答案。
-4. 只有获取全部足够信息之后，才直接输出最终回答。
+4. **当需要做数学计算（加减乘除）时，禁止模型自己心算，必须调用calculator工具。即使你已经看到数字，也不能直接给出计算结果，一定要使用calculator工具完成运算。**
+5. 只有获取全部足够信息之后，才直接输出最终回答。
 
 输出严格JSON格式，禁止输出其他文字！格式二选一：
 
@@ -29,6 +29,7 @@ AGENT_SYSTEM_PROMPT = """
   "tool_args": {{参数键值对}}
 }}
 """.format(tools_info=json.dumps(TOOL_LIST, ensure_ascii=False))
+
 
 
 class SimpleAgent:
