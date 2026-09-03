@@ -16,3 +16,5 @@ ipykernel
 
 #PDF 解析库
 pypdf>=4.0.0
+
+gradio>=5.0
