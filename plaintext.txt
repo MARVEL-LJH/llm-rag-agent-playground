@@ -1,4 +1,5 @@
 llm‑rag‑agent‑playground/
+├── hf_models/       # ✨存放all‑MiniLM‑L6‑v2完整模型，提交gitignore忽略
 ├── README.md               # 项目总说明
 ├── requirements.txt        # python依赖包清单
 ├── .gitignore              # git忽略文件
