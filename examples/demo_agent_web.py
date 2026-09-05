@@ -33,7 +33,7 @@ with gr.Blocks(title="RAG‑Agent知识库助手") as demo:
     gr.Markdown("# 🤖 RAG‑Agent 本地知识库智能体")
     gr.Markdown("功能：本地PDF/TXT知识库检索 + 多轮工具调用（计算器）")
 
-    chatbot = gr.Chatbot(height=550, bubble_full_width=False)
+    chatbot = gr.Chatbot(height=550)
     msg_input = gr.Textbox(label="请输入你的问题", placeholder="文档里面参数A乘以参数B等于多少？")
 
     with gr.Row():
